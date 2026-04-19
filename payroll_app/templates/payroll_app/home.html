@@ -1,3 +1,39 @@
+{# This is how comments are done in Django #}
 
-
-<h1> Hello World! </h1>
+{% extends 'payroll_app/base.html' %}
+{% block content %}
+<div class="col-md-12">
+    <div class="card mt-3 mx-auto px-3 py-3">
+        <div>
+            <h4> Employees </h4>
+        </div>
+        <div class="container mb-3 py-3">
+            <div class="row">
+                <div class="col-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <th scope="col">Name</th>
+                            <th score="col">ID Number</th>
+                            <th scope="col">Rate</th>
+                            <th scope="col">Allowance</th>
+                            <th scope="col">Overtime</th>
+                            <th scope="col">Options</th>
+                        </thead>
+                        <tbody>
+                            {% for e in employees %}
+                            <tr>
+                                <td>{{ e.getName }}</td>
+                                <td>{{ e.id_number }}</td>
+                                <td>{{ e.getRate }}</td>
+                                <td>{{ e.getAllowance }}</td>
+                                <td>{{ e.getOvertime }}</td>
+                                <td><a href="#" class="btn btn-primary">Placeholder</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}
