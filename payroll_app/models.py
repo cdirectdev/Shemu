@@ -15,10 +15,14 @@ class Employee(models.Model):
     def getRate(self):
         return self.rate
     def getOvertime(self):
+        if self.overtime_pay is None:
+            return 0
         return self.overtime_pay
     def resetOvertime(self):
         self.overtime_pay = 0
     def getAllowance(self):
+        if self.allowance is None:
+            return 0
         return self.allowance
     def __str__(self):
         return f"pk: {self.getID()}, rate: {self.getRate()}"
