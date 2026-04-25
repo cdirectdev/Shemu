@@ -1,22 +1,310 @@
 <!DOCTYPE html>
+<!-- this is the base template / "parent" template
+     every other page extends this so they all get the same navbar and footer
+     think of it like a master layout that the other pages just plug into -->
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-        <title> Final Project </title>
-        <style>
-            .footer {
-                position: fixed;
-                left: 0;
-                bottom: 0;
-                width: 100%;
-            }
-        </style>
-    </head>
-    <body>
-        {% block content %}
-        {% endblock %}
-    </body>
+<head>
+  <meta charset="UTF-8" />
+  <!-- so the page doesn't look zoomed out on phones -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shemu Payroll</title>
+
+  <!-- bootstrap CSS — we're loading it from the internet instead of downloading it
+       gives us utility classes and responsive stuff for free -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+  <!-- custom fonts from google fonts
+       Syne = the bold headings/labels font
+       DM Sans = the normal body text font -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* CSS variables — basically just named colors so we don't repeat hex codes everywhere
+       if we want to change a color we only change it here and it updates the whole site */
+    :root {
+      --ink:    #0f1117; /* dark navy — navbar, footer, dark buttons */
+      --paper:  #f5f3ee; /* warm white — page background */
+      --accent: #c8522a; /* orange — active links, submit buttons, highlights */
+      --muted:  #8a8780; /* grey — label text */
+      --card:   #ffffff; /* white — form card background */
+      --border: #e2dfd8; /* light grey — borders and dividers */
+    }
+
+    /* just resetting default browser margins/padding so things look consistent */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* body takes up the full screen height
+       flex + column so the footer always stays at the bottom even on short pages */
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* navbar styles */
+    nav.shemu-nav {
+      background: var(--ink);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      height: 60px;
+      gap: 2.5rem;
+      position: sticky; /* stays at the top when you scroll */
+      top: 0;
+      z-index: 100; /* makes sure it sits on top of everything else */
+      border-bottom: 3px solid var(--accent); /* the orange line at the bottom of the nav */
+    }
+
+    /* the "Shemu" text on the left of the navbar */
+    .shemu-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      color: #fff;
+      letter-spacing: 0.08em;
+      text-decoration: none; /* removes underline since it's an <a> tag */
+      text-transform: uppercase;
+    }
+
+    /* the "mu" part of Shemu — colored orange */
+    .shemu-brand span {
+      color: var(--accent);
+    }
+
+    /* the ul holding the nav links */
+    .nav-links {
+      display: flex;
+      gap: 0.25rem;
+      list-style: none; /* removes bullet points */
+    }
+
+    /* individual nav links — slightly transparent by default */
+    .nav-links a {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #ffffffaa; /* white but see-through */
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    /* fully white when hovered or when it's the current page */
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* main content area — flex:1 makes it stretch to fill the space between nav and footer */
+    main {
+      flex: 1;
+      padding: 2.5rem 2rem;
+      max-width: 1100px; /* so it doesn't go edge to edge on wide monitors */
+      width: 100%;
+      margin: 0 auto; /* centers it */
+    }
+
+    /* big page heading like "Employees" or "Create Employee" */
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 2rem;
+      color: var(--ink);
+      margin-bottom: 1.75rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    /* white rounded box that wraps forms and content */
+    .shemu-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    /* table used on employees and payslips pages */
+    .shemu-table {
+      width: 100%;
+      border-collapse: collapse; /* removes gaps between cell borders */
+      font-size: 0.9rem;
+    }
+
+    /* header row — the row with column labels */
+    .shemu-table th {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 2px solid var(--border);
+      padding: 0.6rem 1rem;
+      text-align: left;
+      background: #faf9f6;
+    }
+
+    /* regular data cells */
+    .shemu-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    /* no border on the last row so it doesn't look doubled */
+    .shemu-table tr:last-child td { border-bottom: none; }
+
+    /* highlight row on hover */
+    .shemu-table tr:hover td { background: #faf9f6; }
+
+    /* base button styles shared across all buttons */
+    .btn-shemu {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none; /* for when a button is actually an <a> tag */
+      display: inline-block;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .btn-shemu:hover { opacity: 0.85; transform: translateY(-1px); } /* lifts on hover */
+    .btn-shemu:active { transform: translateY(0); } /* pushes back down when clicked */
+
+    /* button color options:
+       accent = orange (submit/save)
+       danger = red (delete)
+       outline = transparent with border (cancel / secondary actions) */
+    .btn-primary-shemu  { background: var(--ink);   color: #fff; }
+    .btn-accent-shemu   { background: var(--accent); color: #fff; }
+    .btn-danger-shemu   { background: #c0392b;       color: #fff; }
+    .btn-outline-shemu  {
+      background: transparent;
+      color: var(--ink);
+      border: 1.5px solid var(--ink);
+    }
+
+    /* form label styling */
+    .shemu-form label {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block; /* puts it on its own line above the input */
+      margin-bottom: 0.3rem;
+    }
+
+    /* text inputs and dropdowns */
+    .shemu-form input,
+    .shemu-form select {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 5px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--ink);
+      background: #fff;
+      transition: border-color 0.2s;
+      outline: none; /* removes the default blue browser outline */
+    }
+
+    /* border turns orange when the user clicks into a field */
+    .shemu-form input:focus,
+    .shemu-form select:focus {
+      border-color: var(--accent);
+    }
+
+    /* spacing between each label + input group */
+    .shemu-form .field-group { margin-bottom: 1.25rem; }
+
+    /* alert/error box */
+    .shemu-alert {
+      padding: 0.75rem 1.1rem;
+      border-radius: 5px;
+      font-size: 0.88rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* red tinted error box */
+    .shemu-alert-error {
+      background: #fdf0ed;
+      border: 1px solid #e8b4a8;
+      color: #a03020;
+    }
+
+    /* footer at the very bottom */
+    footer.shemu-footer {
+      background: var(--ink);
+      color: #ffffff55; /* very transparent white so it's subtle */
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.78rem;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 0.08em;
+    }
+
+    /* year number is orange */
+    footer.shemu-footer span { color: var(--accent); }
+  </style>
+
+  <!-- child pages can add their own extra styles here if needed -->
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- navbar — this shows on every page since it's in the base template
+       {% url 'employees' %} generates the link using the name from urls.py
+       the if check adds class="active" to whichever nav link matches the current page -->
+  <nav class="shemu-nav">
+    <a href="{% url 'employees' %}" class="shemu-brand">She<span>mu</span></a>
+    <ul class="nav-links">
+      <li>
+        <a href="{% url 'employees' %}"
+           {% if request.resolver_match.url_name == 'employees' %}class="active"{% endif %}>
+          Employees
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'payslips' %}"
+           {% if request.resolver_match.url_name == 'payslips' %}class="active"{% endif %}>
+          Payslips
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- this is where each child page's content goes
+       when another template does {% extends 'base.html' %} and fills {% block content %},
+       django puts that content right here -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- footer — &copy; is just the © symbol -->
+  <footer class="shemu-footer">
+    &copy; <span>2026</span> &nbsp;Shemu Payroll System
+  </footer>
+
+  <!-- bootstrap JS — loaded at the bottom so it doesn't slow down page load -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- child pages can add their own scripts here -->
+  {% block extra_scripts %}{% endblock %}
+</body>
 </html>

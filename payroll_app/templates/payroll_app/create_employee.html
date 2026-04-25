@@ -1,0 +1,113 @@
+<!-- tells django this page uses base.html as its layout
+     so we get the navbar, footer, and all the CSS without rewriting them -->
+{% extends 'base.html' %}
+
+<!-- everything inside this block is the actual content of this page -->
+{% block content %}
+
+<div class="page-title">Create Employee</div>
+
+<!-- the white card box that holds the form
+     max-width + margin auto just centers it and keeps it from being too wide -->
+<div class="shemu-card" style="max-width: 520px; margin: 0 auto;">
+
+  <!-- only shows up if django found validation errors when the form was submitted
+       like if a required field was empty or the ID number was already taken -->
+  {% if form.errors %}
+    <div class="shemu-alert shemu-alert-error">
+      Please correct the errors below.
+    </div>
+  {% endif %}
+
+  <!-- method POST sends the data in the request body, not in the URL
+       action is where the form data goes when submitted — points to the create view in urls.py -->
+  <form method="POST" action="{% url 'create_employee' %}" class="shemu-form">
+
+    <!-- django requires this on every POST form, it's a security thing
+         basically proves the form came from our site and not somewhere else
+         without it django will just reject the submission -->
+    {% csrf_token %}
+
+    <!-- name field -->
+    <div class="field-group">
+      <label for="name">Name</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        value="{{ form.name.value|default:'' }}"
+        <!-- if the form had errors and was reloaded, this keeps whatever the user typed
+             |default:'' just shows blank instead of "None" if the value is empty -->
+        placeholder="e.g. Juan dela Cruz"
+        required
+      />
+      <!-- field-specific error — shows below the input if this particular field had a problem -->
+      {% if form.name.errors %}
+        <small style="color:#c0392b;">{{ form.name.errors|join:", " }}</small>
+      {% endif %}
+    </div>
+
+    <!-- id number field -->
+    <div class="field-group">
+      <label for="id_number">ID Number</label>
+      <input
+        type="text"
+        id="id_number"
+        name="id_number"
+        value="{{ form.id_number.value|default:'' }}"
+        placeholder="e.g. 150726"
+        required
+      />
+      {% if form.id_number.errors %}
+        <small style="color:#c0392b;">{{ form.id_number.errors|join:", " }}</small>
+      {% endif %}
+    </div>
+
+    <!-- rate field — number type so you can't type letters into it -->
+    <div class="field-group">
+      <label for="rate">Rate (PHP)</label>
+      <input
+        type="number"
+        id="rate"
+        name="rate"
+        value="{{ form.rate.value|default:'' }}"
+        placeholder="e.g. 25000"
+        step="0.01" <!-- allows decimals -->
+        min="0"     <!-- no negative numbers -->
+        required
+      />
+      {% if form.rate.errors %}
+        <small style="color:#c0392b;">{{ form.rate.errors|join:", " }}</small>
+      {% endif %}
+    </div>
+
+    <!-- allowance field — no "required" because it's optional per the specs
+         the employee model has it as nullable so it's fine to leave blank -->
+    <div class="field-group">
+      <label for="allowance">Allowance (Optional)</label>
+      <input
+        type="number"
+        id="allowance"
+        name="allowance"
+        value="{{ form.allowance.value|default:'' }}"
+        placeholder="e.g. 500"
+        step="0.01"
+        min="0"
+      />
+      {% if form.allowance.errors %}
+        <small style="color:#c0392b;">{{ form.allowance.errors|join:", " }}</small>
+      {% endif %}
+    </div>
+
+    <!-- submit and cancel buttons side by side
+         cancel is just an <a> tag styled as a button — it doesn't submit anything,
+         just takes the user back to the employees list -->
+    <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+      <button type="submit" class="btn-shemu btn-accent-shemu">Submit</button>
+      <a href="{% url 'employees' %}" class="btn-shemu btn-outline-shemu">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}
