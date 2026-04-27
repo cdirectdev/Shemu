@@ -28,11 +28,7 @@ class Employee(models.Model):
         return f"pk: {self.getID()}, rate: {self.getRate()}"
     
 class Payslip(models.Model):
-    id_number = models.ForeignKey(
-        Employee,
-        to_field='id_number',
-        on_delete=models.CASCADE
-    )
+    id_number = models.ForeignKey(Employee, to_field='id_number',on_delete=models.CASCADE)
 
     month = models.CharField(max_length=20)
     date_range = models.CharField(max_length=20)

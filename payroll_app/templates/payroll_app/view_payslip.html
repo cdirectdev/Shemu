@@ -1,0 +1,41 @@
+{% extends 'payroll_app/base.html' %}
+{% block content %}
+
+<h1>Payslip</h1>
+
+<div class="card p-4">
+
+<h4>General Details</h4>
+<p>Name: {{ slip.id_number.name }}</p>
+<p>ID Number: {{ slip.getIDNumber }}</p>
+<p>Date: {{ slip.getMonth }} {{ slip.getDate_range }}, {{ slip.getYear }}</p>
+<p>Payslip PK: {{ slip.pk }}</p>
+
+<hr>
+
+<h4>Earnings</h4>
+<p>Rate: {{ slip.getCycleRate }}</p>
+<p>Allowance: {{ slip.getEarnings_allowance }}</p>
+<p>Overtime: {{ slip.getOvertime }}</p>
+
+<hr>
+
+<h4>Deductions</h4>
+<p>Tax: {{ slip.getDeductions_tax }}</p>
+
+{% if slip.pay_cycle == 1 %}
+<p>Pag-ibig: {{ slip.getPag_ibig }}</p>
+{% endif %}
+
+{% if slip.pay_cycle == 2 %}
+<p>Philhealth: {{ slip.getDeductions_health }}</p>
+<p>SSS: {{ slip.getSSS }}</p>
+{% endif %}
+
+<hr>
+
+<h3><b>Net Pay: {{ slip.getTotal_pay }}</b></h3>
+
+</div>
+
+{% endblock %}

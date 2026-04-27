@@ -21,5 +21,7 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('', views.home, name='home'), # edit this nalang to the homepage view
+    path('', views.home, name='employees'),
+    path('payslips/', views.payslips, name='payslips'),
+    path('view-payslip/<int:pk>/', views.view_payslip, name='view_payslip')  # edit this nalang to the homepage view
 ]
