@@ -1,40 +1,93 @@
 {% extends 'payroll_app/base.html' %}
 {% block content %}
 
-<h1>Payslip</h1>
+<div class="container mt-4">
 
-<div class="card p-4">
+    <h2 class="mb-4">Payslip Details</h2>
 
-<h4>General Details</h4>
-<p>Name: {{ slip.id_number.name }}</p>
-<p>ID Number: {{ slip.getIDNumber }}</p>
-<p>Date: {{ slip.getMonth }} {{ slip.getDate_range }}, {{ slip.getYear }}</p>
-<p>Payslip PK: {{ slip.pk }}</p>
+    <div class="card p-3 mb-3">
+        <h4>General Payslip Details</h4>
 
-<hr>
+        <table class="table">
+            <tr>
+                <td><b>Name</b></td>
+                <td>{{ slip.id_number.getName }}</td>
+            </tr>
+            <tr>
+                <td><b>ID Number</b></td>
+                <td>{{ slip.getIDNumber }}</td>
+            </tr>
+            <tr>
+                <td><b>Period</b></td>
+                <td>{{ slip.getMonth }} {{ slip.getDate_range }}, {{ slip.getYear }}</td>
+            </tr>
+            <tr>
+                <td><b>Payslip ID</b></td>
+                <td>{{ slip.pk }}</td>
+            </tr>
+            <tr>
+                <td><b>Cycle</b></td>
+                <td>{{ slip.getPay_cycle }}</td>
+            </tr>
+        </table>
+    </div>
 
-<h4>Earnings</h4>
-<p>Rate: {{ slip.getCycleRate }}</p>
-<p>Allowance: {{ slip.getEarnings_allowance }}</p>
-<p>Overtime: {{ slip.getOvertime }}</p>
 
-<hr>
+    <div class="card p-3 mb-3">
+        <h4>Earnings</h4>
 
-<h4>Deductions</h4>
-<p>Tax: {{ slip.getDeductions_tax }}</p>
+        <table class="table">
+            <tr>
+                <td>Half Monthly Rate</td>
+                <td>{{ slip.getCycleRate }}</td>
+            </tr>
+            <tr>
+                <td>Allowance</td>
+                <td>{{ slip.getEarnings_allowance }}</td>
+            </tr>
+            <tr>
+                <td>Overtime</td>
+                <td>{{ slip.getOvertime }}</td>
+            </tr>
+        </table>
+    </div>
 
-{% if slip.pay_cycle == 1 %}
-<p>Pag-ibig: {{ slip.getPag_ibig }}</p>
-{% endif %}
 
-{% if slip.pay_cycle == 2 %}
-<p>Philhealth: {{ slip.getDeductions_health }}</p>
-<p>SSS: {{ slip.getSSS }}</p>
-{% endif %}
+    <div class="card p-3 mb-3">
+        <h4>Deductions</h4>
 
-<hr>
+        <table class="table">
+            <tr>
+                <td>Tax (20%)</td>
+                <td>{{ slip.getDeductions_tax }}</td>
+            </tr>
 
-<h3><b>Net Pay: {{ slip.getTotal_pay }}</b></h3>
+            {% if slip.pay_cycle == 1 %}
+            <tr>
+                <td>Pag-ibig (Fixed)</td>
+                <td>{{ slip.getPag_ibig }}</td>
+            </tr>
+            {% endif %}
+
+            {% if slip.pay_cycle == 2 %}
+            <tr>
+                <td>Philhealth (4%)</td>
+                <td>{{ slip.getDeductions_health }}</td>
+            </tr>
+            <tr>
+                <td>SSS (4.5%)</td>
+                <td>{{ slip.getSSS }}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <div class="card p-3">
+        <h3>
+            Net Pay:
+            <b>₱{{ slip.getTotal_pay|floatformat:2 }}</b>
+        </h3>
+    </div>
 
 </div>
 

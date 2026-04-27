@@ -20,6 +20,7 @@ class Employee(models.Model):
         return self.overtime_pay
     def resetOvertime(self):
         self.overtime_pay = 0
+        self.save()
     def getAllowance(self):
         if self.allowance is None:
             return 0

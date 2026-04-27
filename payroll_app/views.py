@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect, get_object_or_404   
+from django.contrib import messages
+from calendar import monthrange
 from .models import Employee, Payslip
 
 # Create your views here.
@@ -12,20 +13,29 @@ def payslips(request):
     slips = Payslip.objects.all().order_by('-pk')
 
     if request.method == "POST":
-        payroll_for = request.POST['payroll_for']
-        month = request.POST['month']
-        year = request.POST['year']
-        cycle = int(request.POST['cycle'])
+        payroll_for = request.POST.get('payroll_for')
+        month = request.POST.get('month')
+        year = request.POST.get('year')
+        cycle = int(request.POST.get('cycle'))
+
+        month_map = {
+            "January": 1, "February": 2, "March": 3,
+            "April": 4, "May": 5, "June": 6,
+            "July": 7, "August": 8, "September": 9,
+            "October": 10, "November": 11, "December": 12
+        }
+
+        last_day = monthrange(int(year), month_map[month])[1]
 
         if cycle == 1:
             date_range = "1-15"
         else:
-            date_range = "16-30"
+            date_range = f"16-{last_day}"
 
-        if payroll_for == "all":
-            selected = employees
-        else:
-            selected = Employee.objects.filter(id_number=payroll_for)
+        selected = employees if payroll_for == "all" else Employee.objects.filter(id_number=payroll_for)
+
+        created = 0
+        duplicate = False
 
         for emp in selected:
 
@@ -35,15 +45,17 @@ def payslips(request):
                 year=year,
                 pay_cycle=cycle
             ).exists():
+                duplicate = True
                 continue
 
             half_rate = emp.rate / 2
             allowance = emp.getAllowance()
             overtime = emp.getOvertime()
-            tax = emp.rate * 0.20
 
-            health = 0
+
+            tax = emp.rate * 0.20
             pagibig = 0
+            health = 0
             sss = 0
 
             if cycle == 1:
@@ -52,7 +64,7 @@ def payslips(request):
                 health = emp.rate * 0.04
                 sss = emp.rate * 0.045
 
-            total = half_rate + allowance + overtime - tax - health - pagibig - sss
+            total = half_rate + allowance + overtime - tax - pagibig - health - sss
 
             Payslip.objects.create(
                 id_number=emp,
@@ -70,8 +82,16 @@ def payslips(request):
                 total_pay=total
             )
 
-            emp.resetOvertime()
+            emp.overtime_pay = 0
             emp.save()
+
+            created += 1
+
+        if created:
+            messages.success(request, f"{created} payslip(s) generated successfully.")
+
+        if duplicate:
+            messages.error(request, "Some payslips already exist and were skipped.")
 
         return redirect('payslips')
 
