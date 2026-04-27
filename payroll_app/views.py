@@ -1,5 +1,5 @@
-from django.shortcuts import render, redirect
-from .models import Employee
+from django.shortcuts import render, redirect, get_object_or_404   
+from .models import Employee, Payslip
 
 # Create your views here.
 
