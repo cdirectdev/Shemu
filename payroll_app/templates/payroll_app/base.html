@@ -58,12 +58,11 @@
     </ul>
   </nav>
 
-  <!-- this is where each page's content gets injected
-       when another template does {% extends 'base.html' %} and fills {% block content %},
-       django puts it right here -->
   <main>
     <div class="container">
-      {% block content %}{% endblock %}
+      {% block content %}
+      
+      {% endblock %}
     </div>
   </main>
 
