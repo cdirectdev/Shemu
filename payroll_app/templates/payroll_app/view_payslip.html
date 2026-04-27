@@ -5,10 +5,11 @@
 
     <h2 class="mb-4">Payslip Details</h2>
 
+    <!-- ================= GENERAL DETAILS ================= -->
     <div class="card p-3 mb-3">
         <h4>General Payslip Details</h4>
 
-        <table class="table">
+        <table class="table mb-0">
             <tr>
                 <td><b>Name</b></td>
                 <td>{{ slip.id_number.getName }}</td>
@@ -33,10 +34,11 @@
     </div>
 
 
+    <!-- ================= EARNINGS ================= -->
     <div class="card p-3 mb-3">
         <h4>Earnings</h4>
 
-        <table class="table">
+        <table class="table mb-0">
             <tr>
                 <td>Half Monthly Rate</td>
                 <td>{{ slip.getCycleRate }}</td>
@@ -53,10 +55,11 @@
     </div>
 
 
+    <!-- ================= DEDUCTIONS ================= -->
     <div class="card p-3 mb-3">
         <h4>Deductions</h4>
 
-        <table class="table">
+        <table class="table mb-0">
             <tr>
                 <td>Tax (20%)</td>
                 <td>{{ slip.getDeductions_tax }}</td>
@@ -82,8 +85,10 @@
         </table>
     </div>
 
+
+    <!-- ================= NET PAY ================= -->
     <div class="card p-3">
-        <h3>
+        <h3 class="mb-0">
             Net Pay:
             <b>₱{{ slip.getTotal_pay|floatformat:2 }}</b>
         </h3>
