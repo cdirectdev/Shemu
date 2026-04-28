@@ -282,14 +282,22 @@ def view_payslip(request, pk):
     global account_id
     if account_id == 0:
         return redirect('login')
-    
+
     user = get_object_or_404(Account, pk=account_id)
     slip = get_object_or_404(Payslip, pk=pk)
 
-    if not user.getIsAdmin() and slip.id_number.account.pk != user.employee:
-        messages.error(request, "You can only view your own payslips.")
-        return redirect('payslips')
-    
+    # safely get the linked employee — returns None if admin (no employee linked)
+    try:
+        current_employee = user.employee
+    except Exception:
+        current_employee = None
+
+    # if not admin, check that this payslip belongs to them
+    if not user.getIsAdmin():
+        if current_employee is None or slip.id_number != current_employee:
+            messages.error(request, "You can only view your own payslips.")
+            return redirect('payslips')
+
     gross_pay = slip.getCycleRate() + slip.getEarnings_allowance() + slip.getOvertime()
 
     if slip.getPay_cycle() == 1:
@@ -297,13 +305,12 @@ def view_payslip(request, pk):
     else:
         total_deductions = slip.getDeductions_tax() + slip.getDeductions_health() + slip.getSSS()
 
-    user = get_object_or_404(Account, pk=account_id)
     return render(request, 'payroll_app/view_payslip.html', {
         'slip'            : slip,
         'gross_pay'       : gross_pay,
         'total_deductions': total_deductions,
-        'is_admin' : user.getIsAdmin(),
-        'is_logged': account_id != 0,
-        'account': user,
-        'current_employee': user.employee,
+        'is_admin'        : user.getIsAdmin(),
+        'is_logged'       : account_id != 0,
+        'account'         : user,
+        'current_employee': current_employee,   # ← None for admin, Employee obj for employee
     })
