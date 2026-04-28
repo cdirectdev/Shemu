@@ -138,7 +138,7 @@ def update_employee(request, pk):
         employee.name      = request.POST.get('name')
         employee.id_number = request.POST.get('id_number')
         employee.rate      = request.POST.get('rate')
-        employee.allowance = request.POST.get('allowance')
+        employee.allowance = request.POST.get('allowance') or None
 
         if Employee.objects.filter(id_number=employee.id_number).exclude(pk=employee.pk).exists():
             messages.error(request, "Another employee with this ID number already exists.")
