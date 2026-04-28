@@ -20,6 +20,30 @@ def home(request):
         'employees': all_employees
     })
 
+def add_overtime(request, pk):
+    pass
+
+def create_employee(request):
+    if request.method == "POST":
+        name      = request.POST.get('name')
+        id_number = request.POST.get('id_number')
+        rate      = request.POST.get('rate')
+        allowance = request.POST.get('allowance')
+
+        if Employee.objects.filter(id_number=id_number).exists():
+            messages.error(request, "Employee with this ID number already exists.")
+            return redirect('create_employee')
+
+        Employee.objects.create(
+            id_number=id_number,
+            name=name,
+            rate=rate,
+            allowance=allowance
+        )
+        messages.success(request, "Employee created successfully.")
+        return redirect('employees')
+
+    return render(request, 'payroll_app/create_employee.html')
 def update_employee(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     pass
