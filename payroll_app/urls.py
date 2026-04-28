@@ -23,5 +23,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('', views.home, name='employees'),
     path('payslips/', views.payslips, name='payslips'),
-    path('view-payslip/<int:pk>/', views.view_payslip, name='view_payslip')  # edit this nalang to the homepage view
+    path('view-payslip/<int:pk>/', views.view_payslip, name='view_payslip'),
+    path('update-employee/<int:pk>/', views.update_employee, name='update_employee'),
+    path('delete-employee/<int:pk>/', views.delete_employee, name='delete_employee'),
 ]

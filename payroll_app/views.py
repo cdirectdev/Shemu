@@ -20,6 +20,17 @@ def home(request):
         'employees': all_employees
     })
 
+def update_employee(request, pk):
+    employee = get_object_or_404(Employee, pk=pk)
+    pass
+    return render(request, 'payroll_app/update_employee.html', {'employee': employee})
+
+
+def delete_employee(request, pk):
+    emp = get_object_or_404(Employee, pk=pk)
+    emp.delete()
+    return redirect('employees')
+
 
 def payslips(request):
     employees = Employee.objects.all()
