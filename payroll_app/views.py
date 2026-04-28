@@ -1,8 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from calendar import monthrange
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth import authenticate, login
 from .models import Employee, Payslip, Account
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = authenticate(request, username=username, password=password)
+
+        if user:
+            login(request, user)
+            return redirect('dashboard')
+
+    return render(request, 'login.html')
 
 account_id = 0
 
