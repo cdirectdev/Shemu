@@ -90,4 +90,4 @@ class Payslip(models.Model):
         return self.total_pay
 
     def __str__(self):
-        return f"pk:{self.pk}, Employee:{self.id_number.id_number}, Period:{self.month} {self.date_range}, {self.year}, Cycle:{self.pay_cycle}, Total Pay:{self.total_pay}"
+        return f"pk: {self.pk}, Employee: {self.id_number.id_number}, Period: {self.month} {self.date_range}, {self.year}, Cycle: {self.pay_cycle}, Total Pay: {self.total_pay}"

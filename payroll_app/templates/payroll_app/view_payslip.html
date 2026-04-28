@@ -1,99 +1,233 @@
 {% extends 'payroll_app/base.html' %}
+{% block extra_head %}
+<style>
+  /*
+    base.html gives us:
+      - Bootstrap 5.3
+      - bg: #f8f9fa on body
+      - <main> padding: 2rem
+      - content already inside <div class="container">
+    So we just need to center and style the document itself.
+  */
+
+  /* ── Document shell ── */
+  .payslip-doc {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.09);
+    font-size: .9rem;
+    color: #212529;
+  }
+
+  /* ── Dark letterhead — echoes the navbar in base.html ── */
+  .payslip-letterhead {
+    background: #212529;
+    color: #fff;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .payslip-letterhead .brand {
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .payslip-letterhead .cycle-pill {
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 20px;
+    padding: .2rem .75rem;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .05em;
+  }
+
+  /* ── Document body ── */
+  .payslip-body { padding: 1.75rem 2rem; }
+
+  /* ── General info (Name/ID left, Date/PayslipID right) ── */
+  .slip-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    line-height: 1.9;
+    font-size: .88rem;
+  }
+  .slip-info .info-right { text-align: right; }
+  .slip-info b { font-weight: 700; }
+
+  /* ── AMOUNT column header ── */
+  .amount-header {
+    text-align: right;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #6c757d;
+    border-top: 1px solid #dee2e6;
+    border-bottom: 1px solid #dee2e6;
+    padding: .35rem 0;
+    margin-bottom: .25rem;
+  }
+
+  /* ── Section label (EARNINGS: / DEDUCTIONS:) ── */
+  .slip-section {
+    font-weight: 700;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: .6rem 0 .25rem;
+  }
+
+  /* ── Line item row ── */
+  .slip-row {
+    display: flex;
+    justify-content: space-between;
+    padding: .28rem 0 .28rem 1.5rem;  /* indent */
+    border-bottom: 1px solid #f8f9fa;
+    color: #495057;
+  }
+  .slip-row .row-val {
+    font-family: 'Courier New', monospace;
+    color: #212529;
+    min-width: 90px;
+    text-align: right;
+  }
+
+  /* ── Subtotal (GROSS PAY / TOTAL DEDUCTIONS) ── */
+  .slip-subtotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .55rem 0;
+    margin-top: .2rem;
+    border-top: 1px solid #adb5bd;
+    border-bottom: 1px solid #adb5bd;
+    font-weight: 700;
+  }
+  .slip-subtotal .sub-val {
+    font-family: 'Courier New', monospace;
+    font-size: .95rem;
+  }
+
+  /* ── Divider between sections ── */
+  .slip-divider { margin: .5rem 0; border-color: #f1f3f5; }
+
+  /* ── NET PAY ── */
+  .slip-net {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .8rem 0 .2rem;
+    margin-top: .75rem;
+    border-top: 2px solid #212529;
+    font-weight: 800;
+    font-size: 1rem;
+  }
+  .slip-net .net-val {
+    font-family: 'Courier New', monospace;
+    font-size: 1.05rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
+{# base.html already wraps this in <div class="container"> #}
 
-<div class="container mt-4">
+<div class="row justify-content-center">
+  <div class="col-lg-7 col-md-9 col-12">
+    <div class="payslip-doc">
 
-    <h2 class="mb-4">Payslip Details</h2>
+      <!-- ══ LETTERHEAD ══ -->
+      <div class="payslip-letterhead">
+        <span class="brand">Shemu Payroll</span>
+        <span class="cycle-pill">Cycle {{ slip.getPay_cycle }}</span>
+      </div>
 
-    <!-- ================= GENERAL DETAILS ================= -->
-    <div class="card p-3 mb-3">
-        <h4>General Payslip Details</h4>
+      <div class="payslip-body">
 
-        <table class="table mb-0">
-            <tr>
-                <td><b>Name</b></td>
-                <td>{{ slip.id_number.getName }}</td>
-            </tr>
-            <tr>
-                <td><b>ID Number</b></td>
-                <td>{{ slip.getIDNumber }}</td>
-            </tr>
-            <tr>
-                <td><b>Period</b></td>
-                <td>{{ slip.getMonth }} {{ slip.getDate_range }}, {{ slip.getYear }}</td>
-            </tr>
-            <tr>
-                <td><b>Payslip ID</b></td>
-                <td>{{ slip.pk }}</td>
-            </tr>
-            <tr>
-                <td><b>Cycle</b></td>
-                <td>{{ slip.getPay_cycle }}</td>
-            </tr>
-        </table>
-    </div>
+        <!-- ══ GENERAL INFO ══ -->
+        <div class="slip-info">
+          <div class="info-left">
+            <div><b>NAME:</b> {{ slip.id_number.getName }}</div>
+            <div><b>ID NUMBER:</b> {{ slip.getIDNumber }}</div>
+          </div>
+          <div class="info-right">
+            <div><b>DATE:</b> {{ slip.getMonth }} {{ slip.getDate_range }}, {{ slip.getYear }}</div>
+            <div><b>PAYSLIP ID:</b> {{ slip.pk }}</div>
+          </div>
+        </div>
 
+        <!-- ══ AMOUNT column header ══ -->
+        <div class="amount-header">Amount</div>
 
-    <!-- ================= EARNINGS ================= -->
-    <div class="card p-3 mb-3">
-        <h4>Earnings</h4>
+        <!-- ══ EARNINGS ══ -->
+        <div class="slip-section">Earnings:</div>
 
-        <table class="table mb-0">
-            <tr>
-                <td>Half Monthly Rate</td>
-                <td>{{ slip.getCycleRate }}</td>
-            </tr>
-            <tr>
-                <td>Allowance</td>
-                <td>{{ slip.getEarnings_allowance }}</td>
-            </tr>
-            <tr>
-                <td>Overtime</td>
-                <td>{{ slip.getOvertime }}</td>
-            </tr>
-        </table>
-    </div>
+        <div class="slip-row">
+          <span>Base Pay</span>
+          <span class="row-val">{{ slip.getCycleRate|floatformat:2 }}</span>
+        </div>
+        <div class="slip-row">
+          <span>Allowances</span>
+          <span class="row-val">{{ slip.getEarnings_allowance|floatformat:2 }}</span>
+        </div>
+        <div class="slip-row">
+          <span>Overtime</span>
+          <span class="row-val">{{ slip.getOvertime|floatformat:2 }}</span>
+        </div>
 
+        <div class="slip-subtotal">
+          <span>Gross Pay</span>
+          <span class="sub-val">PHP {{ gross_pay|floatformat:2 }}</span>
+        </div>
 
-    <!-- ================= DEDUCTIONS ================= -->
-    <div class="card p-3 mb-3">
-        <h4>Deductions</h4>
+        <hr class="slip-divider">
 
-        <table class="table mb-0">
-            <tr>
-                <td>Tax (20%)</td>
-                <td>{{ slip.getDeductions_tax }}</td>
-            </tr>
+        <!-- ══ DEDUCTIONS ══ -->
+        <div class="slip-section">Deductions:</div>
 
-            {% if slip.pay_cycle == 1 %}
-            <tr>
-                <td>Pag-ibig (Fixed)</td>
-                <td>{{ slip.getPag_ibig }}</td>
-            </tr>
-            {% endif %}
+        <div class="slip-row">
+          <span>W/Holding Tax</span>
+          <span class="row-val">{{ slip.getDeductions_tax|floatformat:2 }}</span>
+        </div>
 
-            {% if slip.pay_cycle == 2 %}
-            <tr>
-                <td>Philhealth (4%)</td>
-                <td>{{ slip.getDeductions_health }}</td>
-            </tr>
-            <tr>
-                <td>SSS (4.5%)</td>
-                <td>{{ slip.getSSS }}</td>
-            </tr>
-            {% endif %}
-        </table>
-    </div>
+        {% if slip.pay_cycle == 1 %}
+        <div class="slip-row">
+          <span>Pag-ibig</span>
+          <span class="row-val">{{ slip.getPag_ibig|floatformat:2 }}</span>
+        </div>
+        {% endif %}
 
+        {% if slip.pay_cycle == 2 %}
+        <div class="slip-row">
+          <span>PhilHealth</span>
+          <span class="row-val">{{ slip.getDeductions_health|floatformat:2 }}</span>
+        </div>
+        <div class="slip-row">
+          <span>SSS</span>
+          <span class="row-val">{{ slip.getSSS|floatformat:2 }}</span>
+        </div>
+        {% endif %}
 
-    <!-- ================= NET PAY ================= -->
-    <div class="card p-3">
-        <h3 class="mb-0">
-            Net Pay:
-            <b>₱{{ slip.getTotal_pay|floatformat:2 }}</b>
-        </h3>
-    </div>
+        <div class="slip-subtotal">
+          <span>Total Deductions</span>
+          <span class="sub-val">PHP {{ total_deductions|floatformat:2 }}</span>
+        </div>
 
+        <!-- ══ NET PAY ══ -->
+        <div class="slip-net">
+          <span>NET PAY:</span>
+          <span class="net-val">PHP {{ slip.getTotal_pay|floatformat:2 }}</span>
+        </div>
+
+      </div>{# /payslip-body #}
+    </div>{# /payslip-doc #}
+  </div>
 </div>
 
 {% endblock %}
