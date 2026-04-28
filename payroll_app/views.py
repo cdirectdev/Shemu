@@ -21,7 +21,15 @@ def home(request):
     })
 
 def add_overtime(request, pk):
-    pass
+    if request.method == "POST":
+        employee=get_object_or_404(Employee, pk=pk)
+        overtime_hours = request.POST.get('overtime_hours', 0)
+        rate = employee.getRate()
+        overtime_pay = (rate/160) * 1.5 * float(overtime_hours)
+        employee.overtime_pay += overtime_pay
+        employee.save()
+        messages.success(request, "Overtime pay added successfully.")
+    return redirect('employees')
 
 def create_employee(request):
     if request.method == "POST":
@@ -38,7 +46,8 @@ def create_employee(request):
             id_number=id_number,
             name=name,
             rate=rate,
-            allowance=allowance
+            allowance=allowance,
+            overtime_pay=0.0
         )
         messages.success(request, "Employee created successfully.")
         return redirect('employees')
