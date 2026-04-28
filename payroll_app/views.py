@@ -86,7 +86,7 @@ def create_employee(request):
         name      = request.POST.get('name')
         id_number = request.POST.get('id_number')
         rate      = request.POST.get('rate')
-        allowance = request.POST.get('allowance')
+        allowance = request.POST.get('allowance') or None
 
         if Employee.objects.filter(id_number=id_number).exists():
             messages.error(request, "Employee with this ID number already exists.")
