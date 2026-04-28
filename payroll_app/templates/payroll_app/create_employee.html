@@ -31,13 +31,13 @@
     <!-- name field -->
     <div class="field-group">
       <label for="name">Name</label>
+      <!-- if the form had errors and was reloaded, value keeps whatever the user typed
+           |default:'' just shows blank instead of "None" if the value is empty -->
       <input
         type="text"
         id="name"
         name="name"
         value="{{ form.name.value|default:'' }}"
-        <!-- if the form had errors and was reloaded, this keeps whatever the user typed
-             |default:'' just shows blank instead of "None" if the value is empty -->
         placeholder="e.g. Juan dela Cruz"
         required
       />
@@ -66,14 +66,15 @@
     <!-- rate field — number type so you can't type letters into it -->
     <div class="field-group">
       <label for="rate">Rate (PHP)</label>
+      <!-- step="0.01" allows decimals, min="0" prevents negative numbers -->
       <input
         type="number"
         id="rate"
         name="rate"
         value="{{ form.rate.value|default:'' }}"
         placeholder="e.g. 25000"
-        step="0.01" <!-- allows decimals -->
-        min="0"     <!-- no negative numbers -->
+        step="0.01"
+        min="0"
         required
       />
       {% if form.rate.errors %}
