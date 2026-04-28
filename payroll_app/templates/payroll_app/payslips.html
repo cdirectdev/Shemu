@@ -86,21 +86,6 @@
 
 {% block content %}
 
-<!-- ── Flash alerts ── -->
-{% if messages %}
-  {% for message in messages %}
-    <div class="alert
-      {% if 'success' in message.tags %}alert-success
-      {% elif 'warning' in message.tags %}alert-warning
-      {% elif 'error' in message.tags %}alert-danger
-      {% else %}alert-info{% endif %}
-      alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  {% endfor %}
-{% endif %}
-
 <!-- ════════════ PAYROLL CREATION FORM ════════════ -->
 <div class="shemu-card">
   <div class="card-header-dark">Payroll Creation</div>
