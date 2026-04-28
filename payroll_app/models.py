@@ -5,12 +5,15 @@ from django.db import models
 class Account(models.Model):
     username = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
+    is_admin = models.BooleanField(default=False)
     objects = models.Manager()
 
     def getUsername(self):
         return self.username
     def getPassword(self):
         return self.password
+    def getIsAdmin(self):
+        return self.is_admin
     def __str__(self):
         return str(self.pk) + ": " + self.username
     

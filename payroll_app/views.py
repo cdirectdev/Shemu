@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from calendar import monthrange
+from django.contrib.auth.hashers import make_password, check_password
+from .models import Employee, Payslip, Account
 
-from .models import Employee, Payslip
+account_id = 0
 
 MONTHS = [
     "January", "February", "March",
