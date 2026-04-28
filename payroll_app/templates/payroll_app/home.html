@@ -30,7 +30,26 @@
                                 <td>{{ e.getRate }}</td>
                                 <td>{{ e.getAllowance }}</td>
                                 <td>{{ e.getOvertime }}</td>
-                                <td><a href="#" class="btn btn-primary">Placeholder</a></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <!-- Edit button  -->
+                                        <a href="{% url 'update_employee' pk=e.pk %}" class="btn btn-primary btn-sm mr-1 mx-2">Update</a> 
+                                        <!-- Delete button -->
+                                        <a href="{% url 'delete_employee' pk=e.pk %}" class="btn btn-danger btn-sm mx-2">Delete</a>
+                                        <!-- Update button -->
+                                         <form method="POST" action="#" class="d-inline">
+                                            {% csrf_token %}
+                                            <div class="input-group input-group-sm">
+                                                <input type="number" step="1" name="overtime_hours" min="0" class="form-control px-1 mx-2" required placeholder="Overtime Hours">
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-success">Add Overtime</button>
+                                                </div>
+                                            </div>
+
+                                         </form>
+
+                                    </div>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
