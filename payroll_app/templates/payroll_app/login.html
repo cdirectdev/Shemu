@@ -1,0 +1,111 @@
+{% extends 'payroll_app/base.html' %}
+{% block extra_head %}
+<style>
+  .login-card {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,.09);
+  }
+
+  /* dark header — matches navbar in base.html */
+  .login-header {
+    background: #212529;
+    color: #fff;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .login-header .brand {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    display: block;
+  }
+  .login-header .subtitle {
+    font-size: .78rem;
+    color: #adb5bd;
+    margin-top: .25rem;
+    letter-spacing: .04em;
+  }
+
+  .login-body { padding: 2rem; }
+
+  .login-body .form-label {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #6c757d;
+    margin-bottom: .3rem;
+  }
+
+  .btn-login {
+    background: #212529;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    width: 100%;
+    padding: .65rem;
+    font-size: .95rem;
+    transition: background .2s;
+  }
+  .btn-login:hover { background: #343a40; color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center mt-4">
+  <div class="col-lg-4 col-md-6 col-sm-8 col-12">
+    <div class="login-card">
+
+      <!-- ══ Header ══ -->
+      <div class="login-header">
+        <span class="brand">Shemu Payroll</span>
+        <div class="subtitle">Sign in to your account</div>
+      </div>
+
+      <!-- ══ Body ══ -->
+      <div class="login-body">
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert
+              {% if 'error' in message.tags %}alert-danger
+              {% elif 'success' in message.tags %}alert-success
+              {% else %}alert-info{% endif %}
+              alert-dismissible fade show mb-3" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close"
+                      data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control"
+                   placeholder="Enter username" autofocus required>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control"
+                   placeholder="Enter password" required>
+          </div>
+
+          <button type="submit" class="btn-login">Sign In</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

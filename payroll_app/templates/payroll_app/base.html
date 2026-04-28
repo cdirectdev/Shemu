@@ -43,20 +43,36 @@
   <!-- navbar — using bootstrap's built-in dark navbar
        the brand "Shemu" links to the employees page (home)
        the two nav links go to employees and payslips -->
-  <nav class="navbar navbar-expand navbar-dark bg-dark px-4">
-    <a class="navbar-brand fw-bold" href="{% url 'employees' %}">Shemu</a>
-    <ul class="navbar-nav">
-      <!-- active class highlights whichever page you're currently on -->
-      <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'employees' %}active{% endif %}"
-           href="{% url 'employees' %}">Employees</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link {% if request.resolver_match.url_name == 'payslips' %}active{% endif %}"
-           href="{% url 'payslips' %}">Payslips</a>
-      </li>
-    </ul>
-  </nav>
+<nav class="navbar navbar-expand navbar-dark bg-dark px-4">
+  <a class="navbar-brand fw-bold" href="{% url 'employees' %}">Shemu</a>
+
+  {% if request.session.account_id %}
+  <ul class="navbar-nav me-auto">
+
+    {# Employees link — admin only #}
+    {% if account.is_admin %}
+    <li class="nav-item">
+      <a class="nav-link {% if request.resolver_match.url_name == 'employees' %}active{% endif %}"
+         href="{% url 'employees' %}">Employees</a>
+    </li>
+    {% endif %}
+
+    <li class="nav-item">
+      <a class="nav-link {% if request.resolver_match.url_name == 'payslips' %}active{% endif %}"
+         href="{% url 'payslips' %}">Payslips</a>
+    </li>
+
+  </ul>
+  <ul class="navbar-nav ms-auto">
+    <li class="nav-item">
+      <span class="nav-link text-secondary">{{ account.username }}</span>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+    </li>
+  </ul>
+  {% endif %}
+</nav>
 
     <!-- ── Flash alerts ── -->
 {% if messages %}
