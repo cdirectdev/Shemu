@@ -46,7 +46,19 @@ def create_employee(request):
     return render(request, 'payroll_app/create_employee.html')
 def update_employee(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
-    pass
+    if request.method == "POST":
+        employee.name      = request.POST.get('name')
+        employee.id_number = request.POST.get('id_number')
+        employee.rate      = request.POST.get('rate')
+        employee.allowance = request.POST.get('allowance')
+
+        if Employee.objects.filter(id_number=employee.id_number).exclude(pk=employee.pk).exists():
+            messages.error(request, "Another employee with this ID number already exists.")
+            return redirect('update_employee', pk=employee.pk)
+
+        employee.save()
+        messages.success(request, "Employee updated successfully.")
+        return redirect('employees')
     return render(request, 'payroll_app/update_employee.html', {'employee': employee})
 
 
