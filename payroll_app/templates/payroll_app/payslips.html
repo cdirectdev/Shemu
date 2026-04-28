@@ -85,15 +85,13 @@
 {% endblock %}
 
 {% block content %}
-
+{% if can_generate %} 
 <!-- ════════════ PAYROLL CREATION FORM ════════════ -->
 <div class="shemu-card">
   <div class="card-header-dark">Payroll Creation</div>
   <div class="card-body">
     <form method="POST">
       {% csrf_token %}
-
-      <!-- Payroll For — full width -->
       <div class="mb-3">
         <label class="form-label">Payroll For</label>
         <select name="payroll_for" class="form-select">
@@ -134,15 +132,21 @@
     </form>
   </div>
 </div>
-
+{% endif %}
 <!-- ════════════ PAYSLIPS SUMMARY TABLE ════════════ -->
 <div class="shemu-card">
-  <div class="card-header-dark">Payslips Summary</div>
+  <div class="card-header-dark">
+    {% if is_admin %}
+      Payslips Summary
+    {% else %}
+      My Payslips
+    {% endif %}
+  </div>
   <div class="table-responsive">
     <table class="table shemu-table mb-0">
       <thead>
         <tr>
-          <th>ID Number</th>
+          {% if is_admin %}<th>ID Number</th>{% endif %}
           <th>Date</th>
           <th>Cycle</th>
           <th>Total Pay</th>
@@ -152,7 +156,9 @@
       <tbody>
         {% for s in slips %}
         <tr>
-          <td class="id-cell">{{ s.getIDNumber }}</td>
+          {% if is_admin %}
+            <td class="id-cell">{{ s.getIDNumber }}</td>
+          {% endif %}
           <td>{{ s.getMonth }} {{ s.getDate_range }}, {{ s.getYear }}</td>
           <td><span class="cycle-badge">{{ s.getPay_cycle }}</span></td>
           <td class="pay-cell">₱{{ s.getTotal_pay|floatformat:2 }}</td>
@@ -164,7 +170,7 @@
         </tr>
         {% empty %}
         <tr class="empty-state">
-          <td colspan="5">No payslips generated yet.</td>
+          <td colspan="{% if is_admin %}6{% else %}5{% endif %}">No payslips yet.</td>
         </tr>
         {% endfor %}
       </tbody>

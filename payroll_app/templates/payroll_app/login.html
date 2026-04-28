@@ -71,21 +71,7 @@
       <!-- ══ Body ══ -->
       <div class="login-body">
 
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert
-              {% if 'error' in message.tags %}alert-danger
-              {% elif 'success' in message.tags %}alert-success
-              {% else %}alert-info{% endif %}
-              alert-dismissible fade show mb-3" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close"
-                      data-bs-dismiss="alert"></button>
-            </div>
-          {% endfor %}
-        {% endif %}
-
-        <form method="POST">
+        <form method="POST" action="{% url 'login' %}">
           {% csrf_token %}
 
           <div class="mb-3">

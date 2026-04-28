@@ -1,21 +1,24 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password
 
 class Account(models.Model):
     username = models.CharField(max_length=100)
     password = models.CharField(max_length=100)
     is_admin = models.BooleanField(default=False)
+
     objects  = models.Manager()
 
     def getUsername(self):  return self.username
     def getPassword(self):  return self.password
     def getIsAdmin(self):   return self.is_admin
+    def set_password(self, new_password):
+        self.password = make_password(new_password)
     def __str__(self):      return str(self.pk) + ": " + self.username
 
 
 class Employee(models.Model):
     # link to an Account so the employee can log in
-    account      = models.OneToOneField(Account, on_delete=models.SET_NULL,
-                                        null=True, blank=True)
+    account      = models.OneToOneField(Account, on_delete=models.SET_NULL, null=True, blank=True)
     name         = models.CharField(max_length=100)
     id_number    = models.CharField(max_length=12, unique=True)
     rate         = models.FloatField()

@@ -46,11 +46,11 @@
 <nav class="navbar navbar-expand navbar-dark bg-dark px-4">
   <a class="navbar-brand fw-bold" href="{% url 'employees' %}">Shemu</a>
 
-  {% if request.session.account_id %}
+  {% if is_logged %}
   <ul class="navbar-nav me-auto">
 
     {# Employees link — admin only #}
-    {% if account.is_admin %}
+    {% if is_admin %}
     <li class="nav-item">
       <a class="nav-link {% if request.resolver_match.url_name == 'employees' %}active{% endif %}"
          href="{% url 'employees' %}">Employees</a>

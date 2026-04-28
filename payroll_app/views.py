@@ -1,23 +1,34 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from calendar import monthrange
-from django.contrib.auth import authenticate, login
+from django.contrib.auth.hashers import make_password, check_password
 from .models import Employee, Payslip, Account
+account_id = 0
 
 def login_view(request):
+    global account_id
+    if account_id != 0:
+        return redirect('payslips')
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
-        user = authenticate(request, username=username, password=password)
+        user = Account.objects.filter(username=username).first()
+    
+        
+        if user and check_password(password, user.password):
+            account_id = user.pk
+            if user.getIsAdmin():
+                messages.success(request, 'Admin login successful!')
+                return redirect('employees')  
+            else:
+                messages.success(request, 'Employee login successful!')
+                return redirect('payslips')
+        
 
-        if user:
-            login(request, user)
-            return redirect('dashboard')
-
-    return render(request, 'login.html')
-
-account_id = 0
+    
+        messages.error(request, "Invalid login")
+    return render(request, 'payroll_app/login.html')
 
 MONTHS = [
     "January", "February", "March",
@@ -28,11 +39,32 @@ MONTHS = [
 
 MONTH_MAP = {name: i + 1 for i, name in enumerate(MONTHS)}
 
+def logout_view(request):
+    global account_id
+    account_id = 0
+    messages.success(request, "Logged out successfully.")
+    return redirect('login')
 
 def home(request):
-    all_employees = Employee.objects.all()
+    global account_id
+    if account_id == 0:
+        return redirect('login')
+    
+    user = get_object_or_404(Account, pk=account_id)
+    is_admin = user.getIsAdmin()
+
+    if is_admin:
+        all_employees = Employee.objects.all()
+        current_employee = None
+    else:
+        current_employee = user.employee
+        all_employees = []
     return render(request, 'payroll_app/home.html', {
-        'employees': all_employees
+        'employees': all_employees,
+        'is_admin' : user.getIsAdmin(),
+        'is_logged': account_id != 0,
+        'current_employee': current_employee,
+        'account': user,
     })
 
 def add_overtime(request, pk):
@@ -47,6 +79,9 @@ def add_overtime(request, pk):
     return redirect('employees')
 
 def create_employee(request):
+    global account_id
+    if account_id == 0:
+        return redirect('login')
     if request.method == "POST":
         name      = request.POST.get('name')
         id_number = request.POST.get('id_number')
@@ -57,18 +92,46 @@ def create_employee(request):
             messages.error(request, "Employee with this ID number already exists.")
             return redirect('create_employee')
 
-        Employee.objects.create(
-            id_number=id_number,
-            name=name,
-            rate=rate,
-            allowance=allowance,
-            overtime_pay=0.0
-        )
-        messages.success(request, "Employee created successfully.")
-        return redirect('employees')
+        if Account.objects.filter(username=name).exists():
+            messages.error(request, f"Username '{name}' already taken.")
+            return redirect('create_employee')
+    
+        try:
+            # Create Account (username = name, password = "123")
+            account = Account(
+                username=name,  # e.g., "John Doe"
+                is_admin=False
+            )
+            account.set_password("123")  # Hashed password
+            account.save()
 
-    return render(request, 'payroll_app/create_employee.html')
+            # Create Employee and linked to account
+            Employee.objects.create(
+                account=account,
+                id_number=id_number,
+                name=name,
+                rate=rate,
+                allowance=allowance,
+                overtime_pay=0.0
+            )
+            
+            messages.success(request, 
+                f"Employee '{name}' created successfully!<br>")
+            return redirect('employees')
+
+        except Exception as e:
+            messages.error(request, f"Error creating employee: {str(e)}")
+            return redirect('create_employee')
+
+    user = get_object_or_404(Account, pk=account_id)
+    return render(request, 'payroll_app/create_employee.html', {
+        'is_admin' : user.getIsAdmin(),
+        'is_logged': account_id != 0,
+    })
 def update_employee(request, pk):
+    global account_id
+    if account_id == 0:
+        return redirect('login')
     employee = get_object_or_404(Employee, pk=pk)
     if request.method == "POST":
         employee.name      = request.POST.get('name')
@@ -83,7 +146,12 @@ def update_employee(request, pk):
         employee.save()
         messages.success(request, "Employee updated successfully.")
         return redirect('employees')
-    return render(request, 'payroll_app/update_employee.html', {'employee': employee})
+    user = get_object_or_404(Account, pk=account_id)
+    return render(request, 'payroll_app/update_employee.html', {
+        'employee': employee,
+        'is_admin' : user.getIsAdmin(),
+        'is_logged': account_id != 0,
+    })
 
 
 def delete_employee(request, pk):
@@ -93,10 +161,26 @@ def delete_employee(request, pk):
 
 
 def payslips(request):
-    employees = Employee.objects.all()
-    slips     = Payslip.objects.all().order_by('-pk')
+    global account_id
+    if account_id == 0:
+        return redirect('login')
 
-    if request.method == "POST":
+    user = get_object_or_404(Account, pk=account_id)
+    is_admin = user.getIsAdmin()
+
+    if is_admin: # For the admin
+        employees = Employee.objects.all()
+        slips = Payslip.objects.all().order_by('-pk')
+        can_generate = True
+        current_employee = None
+    else: # For the employees
+        employee = user.employee
+        employees = [employee]
+        slips = Payslip.objects.filter(id_number=employee).order_by('-pk')
+        can_generate = False
+        current_employee = employee
+
+    if request.method == "POST" and is_admin:
         payroll_for = request.POST.get('payroll_for')
         month       = request.POST.get('month')
         year        = request.POST.get('year')
@@ -181,16 +265,30 @@ def payslips(request):
             messages.warning(request, "Some payslips already existed and were skipped.")
 
         return redirect('payslips')
-
     return render(request, 'payroll_app/payslips.html', {
         'employees': employees,
         'slips'    : slips,
         'months'   : MONTHS,      # ← used by the month <select> in the template
+        'is_admin' : user.getIsAdmin(),
+        'is_logged': account_id != 0,
+        'current_employee': current_employee,
+        'can_generate': can_generate,  # Controls form visibility
+        'account': user,
     })
 
 
 def view_payslip(request, pk):
+    global account_id
+    if account_id == 0:
+        return redirect('login')
+    
+    user = get_object_or_404(Account, pk=account_id)
     slip = get_object_or_404(Payslip, pk=pk)
+
+    if not user.getIsAdmin() and slip.id_number.account.pk != user.employee:
+        messages.error(request, "You can only view your own payslips.")
+        return redirect('payslips')
+    
     gross_pay = slip.getCycleRate() + slip.getEarnings_allowance() + slip.getOvertime()
 
     if slip.getPay_cycle() == 1:
@@ -198,8 +296,13 @@ def view_payslip(request, pk):
     else:
         total_deductions = slip.getDeductions_tax() + slip.getDeductions_health() + slip.getSSS()
 
+    user = get_object_or_404(Account, pk=account_id)
     return render(request, 'payroll_app/view_payslip.html', {
         'slip'            : slip,
         'gross_pay'       : gross_pay,
         'total_deductions': total_deductions,
+        'is_admin' : user.getIsAdmin(),
+        'is_logged': account_id != 0,
+        'account': user,
+        'current_employee': user.employee,
     })
