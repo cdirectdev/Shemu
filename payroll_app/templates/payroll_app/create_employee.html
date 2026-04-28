@@ -147,29 +147,6 @@
           <small class="text-danger">{{ form.allowance.errors|join:", " }}</small>
         {% endif %}
       </div>
-      <!-- username field -->
-      <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input
-          type="text"
-          name="username"
-          placeholder="e.g. juandelacruz"
-          class="form-control"
-          required
-        />
-      </div>
-
-      <!-- password field -->
-      <div class="mb-4">
-        <label class="form-label">Password</label>
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter a password"
-          class="form-control"
-          required
-        />
-      </div>
       <!-- submit and cancel buttons
            submit saves the new employee to the database
            cancel is just a link back to the employees list — doesn't save anything -->

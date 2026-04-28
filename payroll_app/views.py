@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from calendar import monthrange
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password, check_password 
 from .models import Employee, Payslip, Account
 account_id = 0
 
@@ -128,6 +128,7 @@ def create_employee(request):
         'is_admin' : user.getIsAdmin(),
         'is_logged': account_id != 0,
     })
+
 def update_employee(request, pk):
     global account_id
     if account_id == 0:
