@@ -15,11 +15,20 @@ MONTHS = [
 
 MONTH_MAP = {name: i + 1 for i, name in enumerate(MONTHS)}
 
+def loginpage(request):
+    pass
 
 def home(request):
+    global account_id
+    if account_id == 0:
+        return redirect('login')
     all_employees = Employee.objects.all()
+    user = Account.objects.get(pk=account_id)
     return render(request, 'payroll_app/home.html', {
-        'employees': all_employees
+        'employees': all_employees,
+        'is_logged_in': account_id != 0,
+        'user': user,
+        'is_admin': user.is_admin,
     })
 
 def add_overtime(request, pk):
@@ -34,6 +43,9 @@ def add_overtime(request, pk):
     return redirect('employees')
 
 def create_employee(request):
+    global account_id
+    if account_id == 0:
+        return redirect('login')
     if request.method == "POST":
         name      = request.POST.get('name')
         id_number = request.POST.get('id_number')
@@ -56,6 +68,9 @@ def create_employee(request):
 
     return render(request, 'payroll_app/create_employee.html')
 def update_employee(request, pk):
+    global account_id
+    if account_id == 0:
+        return redirect('login')
     employee = get_object_or_404(Employee, pk=pk)
     if request.method == "POST":
         employee.name      = request.POST.get('name')
@@ -80,6 +95,10 @@ def delete_employee(request, pk):
 
 
 def payslips(request):
+    global account_id
+    if account_id == 0:
+        return redirect('login')
+    
     employees = Employee.objects.all()
     slips     = Payslip.objects.all().order_by('-pk')
 
@@ -177,6 +196,10 @@ def payslips(request):
 
 
 def view_payslip(request, pk):
+    global account_id
+    if account_id == 0:
+        return redirect('login')
+    
     slip = get_object_or_404(Payslip, pk=pk)
     gross_pay = slip.getCycleRate() + slip.getEarnings_allowance() + slip.getOvertime()
 

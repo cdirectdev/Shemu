@@ -47,10 +47,13 @@
     <a class="navbar-brand fw-bold" href="{% url 'employees' %}">Shemu</a>
     <ul class="navbar-nav">
       <!-- active class highlights whichever page you're currently on -->
+      {% if is_admin %}
       <li class="nav-item">
         <a class="nav-link {% if request.resolver_match.url_name == 'employees' %}active{% endif %}"
            href="{% url 'employees' %}">Employees</a>
       </li>
+      {% endif %}
+      
       <li class="nav-item">
         <a class="nav-link {% if request.resolver_match.url_name == 'payslips' %}active{% endif %}"
            href="{% url 'payslips' %}">Payslips</a>

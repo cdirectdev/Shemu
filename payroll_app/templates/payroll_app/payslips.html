@@ -87,6 +87,7 @@
 {% block content %}
 
 <!-- ════════════ PAYROLL CREATION FORM ════════════ -->
+ {%% if is_admin %%}
 <div class="shemu-card">
   <div class="card-header-dark">Payroll Creation</div>
   <div class="card-body">
@@ -134,6 +135,7 @@
     </form>
   </div>
 </div>
+{% endif %}
 
 <!-- ════════════ PAYSLIPS SUMMARY TABLE ════════════ -->
 <div class="shemu-card">
