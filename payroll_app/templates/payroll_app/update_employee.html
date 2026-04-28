@@ -1,106 +1,154 @@
-<!-- same setup as create_employee — extends base.html so we get the navbar and footer -->
+<!-- same setup — extends base.html so we get the navbar, footer, and bootstrap -->
 {% extends 'payroll_app/base.html' %}
+
+<!-- same CSS as create_employee and payslips so the design stays consistent sitewide -->
+{% block extra_head %}
+<style>
+  /* dark header strip on top of the card */
+  .card-header-dark {
+    background: #212529;
+    color: #fff;
+    padding: .85rem 1.25rem;
+    border-radius: 8px 8px 0 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+
+  /* card container with rounded corners and shadow */
+  .shemu-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    overflow: hidden;
+    margin-bottom: 1.75rem;
+  }
+  .shemu-card .card-body { padding: 1.5rem; }
+
+  /* small uppercase grey labels above each input */
+  .form-label {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #6c757d;
+    margin-bottom: .3rem;
+  }
+
+  /* dark submit button matching the navbar */
+  .btn-shemu {
+    background: #212529;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background .2s;
+  }
+  .btn-shemu:hover { background: #343a40; color: #fff; }
+</style>
+{% endblock %}
 
 {% block content %}
 
-<div class="page-title">Update Employee</div>
+<!-- error alert — shows only if django found validation errors on submission -->
+{% if form.errors %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    Please correct the errors below.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{% endif %}
 
+<!-- card wrapper — centered and capped in width same as create page -->
 <div class="shemu-card" style="max-width: 520px; margin: 0 auto;">
+  <div class="card-header-dark">Update Employee</div>
+  <div class="card-body">
 
-  <!-- shows if the form had errors on submission, same as the create page -->
-  {% if form.errors %}
-    <div class="shemu-alert shemu-alert-error">
-      Please correct the errors below.
-    </div>
-  {% endif %}
+    <!-- employee.pk is the primary key django auto-assigns to every database record
+         we pass it in the URL so the view knows WHICH employee we're updating
+         Ced's view needs to pass the employee object in context for the pre-filled values to work -->
+    <form method="POST" action="{% url 'update_employee' employee.pk %}">
 
-  <!-- employee.pk is the primary key (the ID django auto-assigns to every database record)
-       we pass it in the URL so the view knows which employee we're editing
-       Ced's view needs to pass the employee object in context for this to work -->
-  <form method="POST" action="{% url 'update_employee' employee.pk %}" class="shemu-form">
+      <!-- required CSRF security token — django rejects POST forms without this -->
+      {% csrf_token %}
 
-    <!-- same CSRF security token as the create form, required on all POST forms -->
-    {% csrf_token %}
+      <!-- name field — pre-filled with the employee's current name from the database
+           employee.getName calls the getName() method from Ced's Employee model -->
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input
+          type="text"
+          name="name"
+          value="{{ employee.getName }}"
+          placeholder="e.g. Juan dela Cruz"
+          class="form-control"
+          required
+        />
+        {% if form.name.errors %}
+          <small class="text-danger">{{ form.name.errors|join:", " }}</small>
+        {% endif %}
+      </div>
 
-    <!-- name field — value comes from the existing employee in the database
-         employee.getName calls the getName() method from Ced's Employee model
-         so the field is already filled in when the page loads -->
-    <div class="field-group">
-      <label for="name">Name</label>
-      <input
-        type="text"
-        id="name"
-        name="name"
-        value="{{ employee.getName }}"
-        placeholder="e.g. Juan dela Cruz"
-        required
-      />
-      {% if form.name.errors %}
-        <small style="color:#c0392b;">{{ form.name.errors|join:", " }}</small>
-      {% endif %}
-    </div>
+      <!-- id number — pre-filled using getID() from the Employee model -->
+      <div class="mb-3">
+        <label class="form-label">ID Number</label>
+        <input
+          type="text"
+          name="id_number"
+          value="{{ employee.getID }}"
+          placeholder="e.g. 150726"
+          class="form-control"
+          required
+        />
+        {% if form.id_number.errors %}
+          <small class="text-danger">{{ form.id_number.errors|join:", " }}</small>
+        {% endif %}
+      </div>
 
-    <!-- id number — pre-filled using getID() from the Employee model -->
-    <div class="field-group">
-      <label for="id_number">ID Number</label>
-      <input
-        type="text"
-        id="id_number"
-        name="id_number"
-        value="{{ employee.getID }}"
-        placeholder="e.g. 150726"
-        required
-      />
-      {% if form.id_number.errors %}
-        <small style="color:#c0392b;">{{ form.id_number.errors|join:", " }}</small>
-      {% endif %}
-    </div>
+      <!-- rate — pre-filled using getRate() from the Employee model -->
+      <div class="mb-3">
+        <label class="form-label">Rate (PHP)</label>
+        <input
+          type="number"
+          name="rate"
+          value="{{ employee.getRate }}"
+          placeholder="e.g. 25000"
+          class="form-control"
+          step="0.01"
+          min="0"
+          required
+        />
+        {% if form.rate.errors %}
+          <small class="text-danger">{{ form.rate.errors|join:", " }}</small>
+        {% endif %}
+      </div>
 
-    <!-- rate — pre-filled using getRate() from the Employee model -->
-    <div class="field-group">
-      <label for="rate">Rate (PHP)</label>
-      <input
-        type="number"
-        id="rate"
-        name="rate"
-        value="{{ employee.getRate }}"
-        placeholder="e.g. 25000"
-        step="0.01"
-        min="0"
-        required
-      />
-      {% if form.rate.errors %}
-        <small style="color:#c0392b;">{{ form.rate.errors|join:", " }}</small>
-      {% endif %}
-    </div>
+      <!-- allowance — pre-filled using getAllowance()
+           |default:'' handles null — shows blank instead of the word "None" -->
+      <div class="mb-4">
+        <label class="form-label">Allowance (Optional)</label>
+        <input
+          type="number"
+          name="allowance"
+          value="{{ employee.getAllowance|default:'' }}"
+          placeholder="e.g. 500"
+          class="form-control"
+          step="0.01"
+          min="0"
+        />
+        {% if form.allowance.errors %}
+          <small class="text-danger">{{ form.allowance.errors|join:", " }}</small>
+        {% endif %}
+      </div>
 
-    <!-- allowance — pre-filled using getAllowance()
-         |default:'' handles the case where allowance is null in the database
-         so the input shows as blank instead of showing the word "None" -->
-    <div class="field-group">
-      <label for="allowance">Allowance (Optional)</label>
-      <input
-        type="number"
-        id="allowance"
-        name="allowance"
-        value="{{ employee.getAllowance|default:'' }}"
-        placeholder="e.g. 500"
-        step="0.01"
-        min="0"
-      />
-      {% if form.allowance.errors %}
-        <small style="color:#c0392b;">{{ form.allowance.errors|join:", " }}</small>
-      {% endif %}
-    </div>
+      <!-- save changes submits the updated data to the backend
+           cancel just goes back to the employees list without saving anything -->
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-shemu w-100 py-2">Save Changes</button>
+        <a href="{% url 'employees' %}" class="btn btn-outline-secondary w-100 py-2">Cancel</a>
+      </div>
 
-    <!-- save changes submits the updated data
-         cancel just goes back to the employees list without saving anything -->
-    <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
-      <button type="submit" class="btn-shemu btn-accent-shemu">Save Changes</button>
-      <a href="{% url 'employees' %}" class="btn-shemu btn-outline-shemu">Cancel</a>
-    </div>
-
-  </form>
+    </form>
+  </div>
 </div>
 
 {% endblock %}

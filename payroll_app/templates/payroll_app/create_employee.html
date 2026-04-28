@@ -1,114 +1,163 @@
 <!-- tells django this page uses base.html as its layout
-     so we get the navbar, footer, and all the CSS without rewriting them -->
+     so we get the navbar, footer, and bootstrap without rewriting them -->
 {% extends 'payroll_app/base.html' %}
 
-<!-- everything inside this block is the actual content of this page -->
+<!-- injecting page-specific styles into the <head> via the extra_head block
+     we copy the same CSS classes Kiel used in payslips.html so the design is consistent -->
+{% block extra_head %}
+<style>
+  /* dark header strip on top of the card — same as the payslips page */
+  .card-header-dark {
+    background: #212529;
+    color: #fff;
+    padding: .85rem 1.25rem;
+    border-radius: 8px 8px 0 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+
+  /* the main card container — rounded corners with a subtle shadow */
+  .shemu-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    overflow: hidden; /* makes sure the dark header respects the rounded corners */
+    margin-bottom: 1.75rem;
+  }
+  .shemu-card .card-body { padding: 1.5rem; }
+
+  /* small uppercase grey labels above each input — same as Kiel's form labels */
+  .form-label {
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #6c757d;
+    margin-bottom: .3rem;
+  }
+
+  /* dark submit button matching the navbar color — same as Kiel's btn-shemu */
+  .btn-shemu {
+    background: #212529;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background .2s;
+  }
+  .btn-shemu:hover { background: #343a40; color: #fff; }
+</style>
+{% endblock %}
+
+<!-- everything inside this block is the actual content of the create employee page -->
 {% block content %}
 
-<div class="page-title">Create Employee</div>
+<!-- error alert — only shows if django found validation errors on submission
+     like a duplicate ID number or a required field that was left blank -->
+{% if form.errors %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    Please correct the errors below.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+{% endif %}
 
-<!-- the white card box that holds the form
-     max-width + margin auto just centers it and keeps it from being too wide -->
+<!-- the card wrapper — dark header on top, form inside the white body
+     max-width + margin auto centers it and keeps it from being too wide -->
 <div class="shemu-card" style="max-width: 520px; margin: 0 auto;">
+  <div class="card-header-dark">Create Employee</div>
+  <div class="card-body">
 
-  <!-- only shows up if django found validation errors when the form was submitted
-       like if a required field was empty or the ID number was already taken -->
-  {% if form.errors %}
-    <div class="shemu-alert shemu-alert-error">
-      Please correct the errors below.
-    </div>
-  {% endif %}
+    <!-- method POST sends data in the request body, not the URL
+         action points to the create_employee URL defined by Ced in urls.py -->
+    <form method="POST" action="{% url 'create_employee' %}">
 
-  <!-- method POST sends the data in the request body, not in the URL
-       action is where the form data goes when submitted — points to the create view in urls.py -->
-  <form method="POST" action="{% url 'create_employee' %}" class="shemu-form">
+      <!-- required on every POST form — django's security check
+           proves the submission came from our site and not somewhere else
+           without it django will just reject the form -->
+      {% csrf_token %}
 
-    <!-- django requires this on every POST form, it's a security thing
-         basically proves the form came from our site and not somewhere else
-         without it django will just reject the submission -->
-    {% csrf_token %}
+      <!-- name field -->
+      <div class="mb-3">
+        <label class="form-label">Name</label>
+        <!-- if the form reloads after an error, value keeps what the user typed
+             |default:'' shows blank instead of "None" if the value is empty -->
+        <input
+          type="text"
+          name="name"
+          value="{{ form.name.value|default:'' }}"
+          placeholder="e.g. Juan dela Cruz"
+          class="form-control"
+          required
+        />
+        {% if form.name.errors %}
+          <small class="text-danger">{{ form.name.errors|join:", " }}</small>
+        {% endif %}
+      </div>
 
-    <!-- name field -->
-    <div class="field-group">
-      <label for="name">Name</label>
-      <!-- if the form had errors and was reloaded, value keeps whatever the user typed
-           |default:'' just shows blank instead of "None" if the value is empty -->
-      <input
-        type="text"
-        id="name"
-        name="name"
-        value="{{ form.name.value|default:'' }}"
-        placeholder="e.g. Juan dela Cruz"
-        required
-      />
-      <!-- field-specific error — shows below the input if this particular field had a problem -->
-      {% if form.name.errors %}
-        <small style="color:#c0392b;">{{ form.name.errors|join:", " }}</small>
-      {% endif %}
-    </div>
+      <!-- id number field -->
+      <div class="mb-3">
+        <label class="form-label">ID Number</label>
+        <input
+          type="text"
+          name="id_number"
+          value="{{ form.id_number.value|default:'' }}"
+          placeholder="e.g. 150726"
+          class="form-control"
+          required
+        />
+        {% if form.id_number.errors %}
+          <small class="text-danger">{{ form.id_number.errors|join:", " }}</small>
+        {% endif %}
+      </div>
 
-    <!-- id number field -->
-    <div class="field-group">
-      <label for="id_number">ID Number</label>
-      <input
-        type="text"
-        id="id_number"
-        name="id_number"
-        value="{{ form.id_number.value|default:'' }}"
-        placeholder="e.g. 150726"
-        required
-      />
-      {% if form.id_number.errors %}
-        <small style="color:#c0392b;">{{ form.id_number.errors|join:", " }}</small>
-      {% endif %}
-    </div>
+      <!-- rate field — number type so letters can't be typed in
+           step="0.01" allows decimals, min="0" prevents negatives -->
+      <div class="mb-3">
+        <label class="form-label">Rate (PHP)</label>
+        <input
+          type="number"
+          name="rate"
+          value="{{ form.rate.value|default:'' }}"
+          placeholder="e.g. 25000"
+          class="form-control"
+          step="0.01"
+          min="0"
+          required
+        />
+        {% if form.rate.errors %}
+          <small class="text-danger">{{ form.rate.errors|join:", " }}</small>
+        {% endif %}
+      </div>
 
-    <!-- rate field — number type so you can't type letters into it -->
-    <div class="field-group">
-      <label for="rate">Rate (PHP)</label>
-      <!-- step="0.01" allows decimals, min="0" prevents negative numbers -->
-      <input
-        type="number"
-        id="rate"
-        name="rate"
-        value="{{ form.rate.value|default:'' }}"
-        placeholder="e.g. 25000"
-        step="0.01"
-        min="0"
-        required
-      />
-      {% if form.rate.errors %}
-        <small style="color:#c0392b;">{{ form.rate.errors|join:", " }}</small>
-      {% endif %}
-    </div>
+      <!-- allowance field — no "required" because it's optional per the specs
+           the employee model has it as nullable so it's fine to leave blank -->
+      <div class="mb-4">
+        <label class="form-label">Allowance (Optional)</label>
+        <input
+          type="number"
+          name="allowance"
+          value="{{ form.allowance.value|default:'' }}"
+          placeholder="e.g. 500"
+          class="form-control"
+          step="0.01"
+          min="0"
+        />
+        {% if form.allowance.errors %}
+          <small class="text-danger">{{ form.allowance.errors|join:", " }}</small>
+        {% endif %}
+      </div>
 
-    <!-- allowance field — no "required" because it's optional per the specs
-         the employee model has it as nullable so it's fine to leave blank -->
-    <div class="field-group">
-      <label for="allowance">Allowance (Optional)</label>
-      <input
-        type="number"
-        id="allowance"
-        name="allowance"
-        value="{{ form.allowance.value|default:'' }}"
-        placeholder="e.g. 500"
-        step="0.01"
-        min="0"
-      />
-      {% if form.allowance.errors %}
-        <small style="color:#c0392b;">{{ form.allowance.errors|join:", " }}</small>
-      {% endif %}
-    </div>
+      <!-- submit and cancel buttons
+           submit saves the new employee to the database
+           cancel is just a link back to the employees list — doesn't save anything -->
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-shemu w-100 py-2">Submit</button>
+        <a href="{% url 'employees' %}" class="btn btn-outline-secondary w-100 py-2">Cancel</a>
+      </div>
 
-    <!-- submit and cancel buttons side by side
-         cancel is just an <a> tag styled as a button — it doesn't submit anything,
-         just takes the user back to the employees list -->
-    <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
-      <button type="submit" class="btn-shemu btn-accent-shemu">Submit</button>
-      <a href="{% url 'employees' %}" class="btn-shemu btn-outline-shemu">Cancel</a>
-    </div>
-
-  </form>
+    </form>
+  </div>
 </div>
 
 {% endblock %}
