@@ -1,6 +1,19 @@
 from django.db import models
 
 # Create your models here.
+
+class Account(models.Model):
+    username = models.CharField(max_length=100)
+    password = models.CharField(max_length=100)
+    objects = models.Manager()
+
+    def getUsername(self):
+        return self.username
+    def getPassword(self):
+        return self.password
+    def __str__(self):
+        return str(self.pk) + ": " + self.username
+    
 class Employee(models.Model):
     name = models.CharField(max_length=100)
     id_number = models.CharField(max_length=12, unique=True)
