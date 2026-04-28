@@ -18,7 +18,7 @@ class Account(models.Model):
 
 class Employee(models.Model):
     # link to an Account so the employee can log in
-    account      = models.OneToOneField(Account, on_delete=models.SET_NULL, null=True, blank=True)
+    account      = models.OneToOneField(Account, on_delete=models.CASCADE, null=True, blank=True)
     name         = models.CharField(max_length=100)
     id_number    = models.CharField(max_length=12, unique=True)
     rate         = models.FloatField()
