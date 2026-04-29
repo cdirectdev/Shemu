@@ -40,7 +40,7 @@
                                          <form method="POST" action="{% url 'add_overtime' pk=e.pk %}" class="d-inline">
                                             {% csrf_token %}
                                             <div class="input-group input-group-sm">
-                                                <input type="number" step="1" name="overtime_hours" min="0" class="form-control px-1 mx-2" required placeholder="Overtime Hours">
+                                                <input type="number" step="any" name="overtime_hours" min="0" class="form-control px-1 mx-2" required placeholder="Overtime Hours">
                                                 <div class="input-group-append">
                                                     <button type="submit" class="btn btn-success">Add Overtime</button>
                                                 </div>
