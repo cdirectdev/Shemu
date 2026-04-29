@@ -157,9 +157,13 @@ def update_employee(request, pk):
 
 def delete_employee(request, pk):
     emp = get_object_or_404(Employee, pk=pk)
+    
+    # delete the linked account too if it exists
+    if emp.account:
+        emp.account.delete()
+    
     emp.delete()
     return redirect('employees')
-
 
 def payslips(request):
     global account_id
